@@ -4,52 +4,46 @@ import Notification from "../Notification/Notification";
 import VoteOptions from "../VoteOptions/VoteOptions";
 import VoteStats from "../VoteStats/VoteStats";
 
-// import type { Votes } from "../../types/votes";
-
-// interface VotesProps {
-//   votes: Votes;
-// }
+import type { Votes, VoteType } from "../../types/votes";
 
 import css from "./App.module.css";
 
 export default function App() {
-  const [good, setGood] = useState<number>(0);
-  const [neutral, setNeutral] = useState<number>(0);
-  const [bad, setBad] = useState<number>(0);
+  const [votes, setVotes] = useState<Votes>({
+    good: 0,
+    neutral: 0,
+    bad: 0,
+  });
 
-  const totalVotes = good + neutral + bad;
+  const totalVotes = votes.good + votes.neutral + votes.bad;
+  const positiveRate = totalVotes
+    ? Math.round((votes.good / totalVotes) * 100)
+    : 0;
 
-  const handleClickGood = () => {
-    setGood((prevVote) => prevVote + 1);
-  };
-  const handleClickNeutral = () => {
-    setNeutral((prevVote) => prevVote + 1);
-  };
-  const handleClickBad = () => {
-    setBad((prevVote) => prevVote + 1);
+  const handleVote = (type: VoteType) => {
+    setVotes((prevVotes) => ({
+      ...prevVotes,
+      [type]: prevVotes[type] + 1,
+    }));
   };
 
-  const handleClickReset = () => {
-    setGood(0);
-    setNeutral(0);
-    setBad(0);
+  const resetVotes = () => {
+    setVotes({ good: 0, neutral: 0, bad: 0 });
   };
 
   return (
     <div className={css.app}>
       <CafeInfo />
       <VoteOptions
-        onGood={handleClickGood}
-        onNeutral={handleClickNeutral}
-        onBad={handleClickBad}
-        onReset={handleClickReset}
+        onVote={handleVote}
+        onReset={resetVotes}
+        canReset={totalVotes}
       />
       {totalVotes > 0 ? (
         <VoteStats
-          onTotal={totalVotes}
-          onGood={good}
-          onNeutral={neutral}
-          onBad={bad}
+          votes={votes}
+          totalVotes={totalVotes}
+          positiveRate={positiveRate}
         />
       ) : (
         <Notification />
